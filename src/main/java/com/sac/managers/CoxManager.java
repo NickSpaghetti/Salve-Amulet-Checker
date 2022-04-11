@@ -1,5 +1,6 @@
 package com.sac.managers;
 
+import lombok.Getter;
 import lombok.val;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -24,7 +25,9 @@ public class CoxManager {
 
     @Inject
     private Client client;
-    private HashSet<Player> playersInRaid;
+
+    @Getter
+    public HashSet<Player> playersInRaid;
 
     public boolean isPlayerInCoxParty() {
         boolean isInParty = false;
@@ -70,7 +73,7 @@ public class CoxManager {
 
     public void setUpRaidParty(Tile currentTile) {
         val coxRaidParty = new HashSet<Player>();
-        if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxParty()) {
+        if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxParty() && currentTile != null) {
             int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
 
@@ -84,7 +87,7 @@ public class CoxManager {
     }
 
     public InstanceTemplates getCurrentRoom(Tile currentTile){
-        if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxRaid()) {
+        if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxRaid() && currentTile != null) {
             int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
             return template;
@@ -95,9 +98,12 @@ public class CoxManager {
 
     public HashMap<Player, Boolean> getPlayersInMysticRoom() {
         val playersInMysticRoom = new HashMap<Player, Boolean>();
+        if(playersInRaid == null){
+           return playersInMysticRoom;
+        }
         for (Player player : playersInRaid) {
 
-            boolean isPlayerInMysticRoom = isInMysticRoom(player.getWorldLocation().getPlane(), player.getWorldLocation().getX()/8, player.getWorldLocation().getY()/8);
+            boolean isPlayerInMysticRoom = isInMysticRoom(player.getWorldLocation().getPlane(), player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY());
             if (playersInMysticRoom.containsKey(player.getName())) {
                 playersInMysticRoom.replace(player, isPlayerInMysticRoom);
             } else {

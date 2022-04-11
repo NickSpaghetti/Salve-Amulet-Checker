@@ -1,5 +1,5 @@
 package com.sac.panel;
-
+import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
 import com.sac.constants.EntityNames;
 import com.sac.state.PanelState;
@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class SalveAmuletCheckerPanel extends PluginPanel {
+
 
     private JComboBox monsterDropDown;
     private Constructor<EntityNames> EntityNamesConstructor;
@@ -49,15 +50,8 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
         overallInfo.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         overallInfo.setLayout(new GridLayout(3, 1));
         overallInfo.setBorder(new EmptyBorder(2, 10, 2, 0));
-        //overallPlayersLabel.setFont(FontManager.getRunescapeSmallFont());
-        //overallMistakesLabel.setFont(FontManager.getRunescapeSmallFont());
-        //overallRaidsLabel.setFont(FontManager.getRunescapeSmallFont());
-        //overallInfo.add(overallPlayersLabel);
-        //overallInfo.add(overallMistakesLabel);
-        //overallInfo.add(overallRaidsLabel);
-        //overallPanel.add(overallIcon, BorderLayout.WEST);
-        //overallPanel.add(overallInfo, BorderLayout.CENTER);
     }
+
 
     private void loadMonsterDropDown(){
         try{
@@ -95,9 +89,6 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
                 {
                     final ComboBoxIconEntity mob = (ComboBoxIconEntity) e.getItem();
                     PanelState.CurrentMonsterSelected = mob.getText();
-                    //todo create config
-                    //sacPlugin.getConfigManager().setConfiguration("questhelper", "Monster Select",
-                    //         mobName);
                 }
             });
 
@@ -119,4 +110,5 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
     public void loadHeaderIcon(BufferedImage img) {
         overallIcon.setIcon(new ImageIcon(img));
     }
+
 }
