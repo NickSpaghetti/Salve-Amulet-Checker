@@ -36,7 +36,6 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
         setBackground(ColorScheme.DARK_GRAY_COLOR);
         setLayout(new GridBagLayout());
         loadMonsterDropDown();
-        loadActiveMonsterTextField();
     }
 
 
@@ -109,18 +108,16 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
 
     }
 
-    public String getActiveMonster(){return activeMonsterTextField != null ? activeMonsterTextField.getText() : "";}
+    public String getActiveMonster(){
+        ComboBoxIconEntity<String> activeMonster = (ComboBoxIconEntity<String>) monsterDropDown.getSelectedItem();
+        return activeMonster.getText();
+    }
 
     public void loadHeaderIcon(BufferedImage img) {
         overallIcon.setIcon(new ImageIcon(img));
     }
 
     public void setActiveMonster(String activeMonster, boolean isDropDownChanged){
-        if(activeMonsterTextField == null){
-            loadActiveMonsterTextField();
-        }
-        activeMonsterTextField.setText(activeMonster);
-
         if(!isDropDownChanged){
             return;
         }

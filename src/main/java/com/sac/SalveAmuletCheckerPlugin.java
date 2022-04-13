@@ -80,9 +80,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private CoxLocationOverlay coxLocationOverlay;
 
 
-	@Inject
-	private RuneLiteConfig runeLiteConfig;
-
 	private TobState currentTobState;
 	private SalveAmuletCheckerPanel panel;
 	private NavigationButton navButton;
@@ -142,43 +139,45 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private void computeActiveCheck(){
 		if(config.isEnabledInTob()){
 			currentTobState = tobManager.getTobState();
-			if (currentTobState != TobState.InTob){
-				return;
-			}
-			panel.setActiveMonster(EntityNames.BLOAT, true);
-			tobManager.LoadRaiders();
-			if(tobManager.GetRoom() == EntityNames.BLOAT){
-				//do check for players without salve
-				for (Player player: client.getPlayers()) {
-					if(tobManager.getRaiderNames().contains(player.getName())){
-						if(!isSalveAmuletEquipped(player)){
-							whenSalveAmuletNotEquipped(player);
+			if (currentTobState == TobState.InTob){
+				panel.setActiveMonster(EntityNames.BLOAT, true);
+				tobManager.LoadRaiders();
+				if(tobManager.GetRoom() == EntityNames.BLOAT){
+					//do check for players without salve
+					for (Player player: client.getPlayers()) {
+						if(tobManager.getRaiderNames().contains(player.getName())){
+							if(!isSalveAmuletEquipped(player)){
+								whenSalveAmuletNotEquipped(player);
+							}
 						}
 					}
 				}
 			}
+
 		}
-		else if(config.isEnabledInCox()){
-			panel.setActiveMonster(EntityNames.MYSTIC, true);
+		if(config.isEnabledInCox()){
 			if(coxManager.isPlayerInCoxParty()){
 				coxManager.setUpRaidParty(client.getSelectedSceneTile());
 			}
-			val currentRoom = coxManager.getCurrentRoom(client.getSelectedSceneTile());
-			if(currentRoom != null){
-				addCoxSalveAmuletCheckerInfoBox(currentRoom.name(),currentRoom.name(),Color.white);
-			}
-			val playersMap = coxManager.getPlayersInMysticRoom();
-			playersMap.forEach((player,isInMysticRoom) -> {
-				addPlayerSalveAmuletCheckerInfoBox(player.getName(),isInMysticRoom.toString(), Color.black);
-				if(isInMysticRoom){
-					 if(!isSalveAmuletEquipped(player)) {
-						 log.debug(player.getName());
-						 if(config.isToxic()){
-							 whenSalveAmuletNotEquipped(player);
-						 }
-					 }
+			if(coxManager.isPlayerInCoxRaid()){
+				panel.setActiveMonster(EntityNames.MYSTIC,true);
+				val currentRoom = coxManager.getCurrentRoom(client.getSelectedSceneTile());
+				if(currentRoom != null){
+					addCoxSalveAmuletCheckerInfoBox(currentRoom.name(),currentRoom.name(),Color.white);
 				}
-			});
+				val playersMap = coxManager.getPlayersInMysticRoom();
+				playersMap.forEach((player,isInMysticRoom) -> {
+					addPlayerSalveAmuletCheckerInfoBox(player.getName(),isInMysticRoom.toString(), Color.black);
+					if(isInMysticRoom){
+						if(!isSalveAmuletEquipped(player)) {
+							log.debug(player.getName());
+							if(config.isToxic()){
+								whenSalveAmuletNotEquipped(player);
+							}
+						}
+					}
+				});
+			}
 		}
 
 	}

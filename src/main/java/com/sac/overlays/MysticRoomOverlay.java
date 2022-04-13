@@ -49,7 +49,7 @@ public class MysticRoomOverlay extends OverlayPanel {
     public Dimension render(Graphics2D graphics) {
 
         //if(plugin.activeMonster == EntityNames.MYSTIC && !plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.isInMysticRoom(client.getSelectedSceneTile()) && plugin.coxManager.playersInRaid != null){
-        if(plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.playersInRaid != null ){
+        if(plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.playersInRaid != null && plugin.coxManager.isInMysticRoom(client.getSelectedSceneTile()) ){
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)

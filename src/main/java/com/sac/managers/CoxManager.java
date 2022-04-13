@@ -41,7 +41,7 @@ public class CoxManager {
     public boolean isPlayerInCoxRaid() {
         boolean isInRaid = false;
         if (client.getGameState() == GameState.LOGGED_IN) {
-            isInRaid = client.getVar(Varbits.IN_RAID) != -1;
+            isInRaid = client.getVar(Varbits.IN_RAID) != 0;
         }
 
         return isInRaid;
