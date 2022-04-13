@@ -3,9 +3,31 @@ package com.sac;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("Salve Amulet Checker")
 public interface SalveAmuletCheckerConfig extends Config {
+
+    @ConfigItem(
+            keyName = "isEnabledInCox",
+            name = "Enable Salve Amulet Check in Cox",
+            description = "Shows the overlay for Salve Amulet Check in Chambers of Xeric",
+            position = 0
+    )
+    default boolean isEnabledInCox() {
+        return true;
+    }
+
+    @ConfigItem(
+            keyName = "isEnabledInTob",
+            name = "Enable Salve Amulet Check in Tob",
+            description = "Shows the overlay for Salve Amulet Check in Theatre of Blood",
+            position = 0
+    )
+    default boolean isEnabledInTob() {
+        return true;
+    }
+
 
     @ConfigItem(
             keyName = "isLocationVisibleInCox",

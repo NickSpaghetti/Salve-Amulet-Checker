@@ -12,7 +12,6 @@ import com.sac.models.SaRaider;
 import com.sac.overlays.CoxLocationOverlay;
 import com.sac.overlays.MysticRoomOverlay;
 import com.sac.panel.SalveAmuletCheckerPanel;
-import com.sac.state.PanelState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -80,10 +79,10 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	@Inject
 	private CoxLocationOverlay coxLocationOverlay;
 
+
 	@Inject
 	private RuneLiteConfig runeLiteConfig;
 
-	public String activeMonster;
 	private TobState currentTobState;
 	private SalveAmuletCheckerPanel panel;
 	private NavigationButton navButton;
@@ -99,6 +98,7 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	{
 		// Can't @Inject because it is nulled out in shutdown()
 		panel = injector.getInstance(SalveAmuletCheckerPanel.class);
+
 		InputStream in = SalveAmuletCheckerPlugin.class.getResourceAsStream("salveAmuletEi.png");
 
 		BufferedImage ICON = ImageUtil.loadImageResource(SalveAmuletCheckerPlugin.class, "salveAmuletEi.png");
@@ -111,7 +111,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 		log.info("Salve Amulet Checker started!");
 
-		activeMonster = PanelState.CurrentMonsterSelected;
 		overlayManager.add(mysticRoomOverlay);
 		overlayManager.add(coxLocationOverlay);
 	}
@@ -128,11 +127,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		overlayManager.remove(coxLocationOverlay);
 	}
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		activeMonster = PanelState.CurrentMonsterSelected;
-	}
 
 	@Provides
 	SalveAmuletCheckerConfig provideConfig(ConfigManager configManager)
@@ -146,12 +140,12 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	}
 
 	private void computeActiveCheck(){
-		activeMonster = PanelState.CurrentMonsterSelected;
-		if(activeMonster == EntityNames.BLOAT){
+		if(config.isEnabledInTob()){
 			currentTobState = tobManager.getTobState();
 			if (currentTobState != TobState.InTob){
 				return;
 			}
+			panel.setActiveMonster(EntityNames.BLOAT, true);
 			tobManager.LoadRaiders();
 			if(tobManager.GetRoom() == EntityNames.BLOAT){
 				//do check for players without salve
@@ -164,7 +158,8 @@ public class SalveAmuletCheckerPlugin extends Plugin
 				}
 			}
 		}
-		else if(activeMonster == EntityNames.MYSTIC){
+		else if(config.isEnabledInCox()){
+			panel.setActiveMonster(EntityNames.MYSTIC, true);
 			if(coxManager.isPlayerInCoxParty()){
 				coxManager.setUpRaidParty(client.getSelectedSceneTile());
 			}

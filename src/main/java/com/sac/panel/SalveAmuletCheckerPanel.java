@@ -2,13 +2,15 @@ package com.sac.panel;
 import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
 import com.sac.constants.EntityNames;
-import com.sac.state.PanelState;
+import lombok.extern.slf4j.Slf4j;
+
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -18,42 +20,28 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+@Slf4j
 public class SalveAmuletCheckerPanel extends PluginPanel {
 
 
     private JComboBox monsterDropDown;
+    private JTextField activeMonsterTextField;
     private Constructor<EntityNames> EntityNamesConstructor;
     private final JLabel overallIcon = new JLabel();
 
 
-    public SalveAmuletCheckerPanel()  {
+    @Inject
+    public SalveAmuletCheckerPanel(SalveAmuletCheckerConfig config)  {
         super(true);
-
         setBackground(ColorScheme.DARK_GRAY_COLOR);
         setLayout(new GridBagLayout());
-
-        /* Setup overview panel */
-        JPanel titlePanel = new JPanel();
-        titlePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        titlePanel.setLayout(new BorderLayout());
-
-        JLabel title = new JLabel();
-        title.setText("Salve Amulet Checker");
-        title.setForeground(Color.WHITE);
-        titlePanel.add(title, BorderLayout.WEST);
-
-        //loads the monster dropdown
         loadMonsterDropDown();
-
-
-        final JPanel overallInfo = new JPanel();
-        overallInfo.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        overallInfo.setLayout(new GridLayout(3, 1));
-        overallInfo.setBorder(new EmptyBorder(2, 10, 2, 0));
+        loadActiveMonsterTextField();
     }
 
 
     private void loadMonsterDropDown(){
+        JPanel monsterDropDownPanel = new JPanel();
         try{
             Field[] fields = EntityNames.class.getFields();
             EntityNamesConstructor = EntityNames.class.getDeclaredConstructor();
@@ -71,7 +59,7 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
             monsterDropDown.setMaximumRowCount(values.size());
             monsterDropDown.setForeground(Color.WHITE);
             final ComboBoxIconListRenderer renderer = new ComboBoxIconListRenderer();
-            renderer.setDefaultText("Select a Monster");
+            renderer.setDefaultText("See Monsters");
             monsterDropDown.setRenderer(renderer);
 
             for(String mobName : values){
@@ -88,13 +76,14 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
                 if (e.getStateChange() == ItemEvent.SELECTED)
                 {
                     final ComboBoxIconEntity mob = (ComboBoxIconEntity) e.getItem();
-                    PanelState.CurrentMonsterSelected = mob.getText();
+                    setActiveMonster(mob.getText(),false);
                 }
             });
 
-            monsterDropDown.setSelectedIndex(-1);
 
-            add(monsterDropDown);
+            monsterDropDown.setSelectedIndex(-1);
+            monsterDropDownPanel.add(monsterDropDown,BorderLayout.NORTH);
+            add(monsterDropDownPanel);
         }
         catch (IllegalAccessException iaex){
             iaex.printStackTrace();
@@ -107,8 +96,43 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
         }
     }
 
+    private void loadActiveMonsterTextField(){
+        final JPanel activeMonsterPanel = new JPanel();
+        activeMonsterPanel.setLayout(new GridLayout(1, 1));
+        activeMonsterTextField = new JTextField();
+        activeMonsterTextField.setEditable(false);
+        activeMonsterTextField.setText("No Active Monster");
+        activeMonsterTextField.setFocusable(false);
+        activeMonsterTextField.setForeground(Color.WHITE);
+        activeMonsterPanel.add(activeMonsterTextField,BorderLayout.CENTER);
+        add(activeMonsterPanel);
+
+    }
+
+    public String getActiveMonster(){return activeMonsterTextField != null ? activeMonsterTextField.getText() : "";}
+
     public void loadHeaderIcon(BufferedImage img) {
         overallIcon.setIcon(new ImageIcon(img));
+    }
+
+    public void setActiveMonster(String activeMonster, boolean isDropDownChanged){
+        if(activeMonsterTextField == null){
+            loadActiveMonsterTextField();
+        }
+        activeMonsterTextField.setText(activeMonster);
+
+        if(!isDropDownChanged){
+            return;
+        }
+
+        for (int i = 0; i < monsterDropDown.getItemCount(); i++){
+            ComboBoxIconEntity<String> entity = (ComboBoxIconEntity<String>) monsterDropDown.getItemAt(i);
+            if(entity.getText() == activeMonster){
+                monsterDropDown.setSelectedIndex(i);
+                return;
+            }
+        }
+
     }
 
 }
