@@ -45,7 +45,6 @@ public class TobManager {
     public void LoadRaiders(){
         for (int i = 0; i < MAX_RAIDERS; i++) {
             String playerName = client.getVarcStrValue(THEATRE_RAIDERS_VARC + i);
-
             if (playerName != null && !playerName.isEmpty()) {
                  tobRaiderNames.add(Text.sanitize(playerName));
             }
