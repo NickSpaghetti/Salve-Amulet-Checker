@@ -29,6 +29,9 @@ public class CoxManager {
     @Getter
     public HashSet<Player> playersInRaid;
 
+    public final static String RAID_START_MESSAGE = "The raid has begun!";
+    public final static String RAID_END_MESSAGE = "As the Great Olm collapses, the crystal blocking your exit has been shattered";
+
     public boolean isPlayerInCoxParty() {
         boolean isInParty = false;
         if (client.getGameState() == GameState.LOGGED_IN) {
@@ -45,6 +48,14 @@ public class CoxManager {
         }
 
         return isInRaid;
+    }
+
+    public boolean isRaidInProgress(){
+        boolean isRaidInProgress = false;
+        if (client.getGameState() == GameState.LOGGED_IN) {
+            isRaidInProgress = client.getVar(Varbits.RAID_STATE) == 1;
+        }
+        return isRaidInProgress;
     }
 
     public boolean isInMysticRoom(Tile currentTile) {
@@ -77,11 +88,12 @@ public class CoxManager {
             int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
 
-            if (template == InstanceTemplates.RAIDS_LOBBY){
+            if ((template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START)){
                 coxRaidParty.clear();
                 coxRaidParty.addAll(client.getPlayers());
+                playersInRaid = coxRaidParty;
             }
-            playersInRaid = coxRaidParty;
+
         }
 
     }
@@ -111,6 +123,11 @@ public class CoxManager {
             }
         }
         return playersInMysticRoom;
+    }
+
+    public void removePlayerFromParty(String playerName)
+    {
+        playersInRaid.removeIf(player -> (player.getName() == playerName));
     }
 
 }

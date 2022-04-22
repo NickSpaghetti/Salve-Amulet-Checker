@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.runelite.api.*;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.kit.KitType;
@@ -35,6 +36,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBox;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.Text;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -85,6 +87,7 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private NavigationButton navButton;
 	private ArrayList<SaRaider> saRaiders;
 	private SalveAmuletCheckerInfoBox coxSalveAmuletCheckerInfoBox;
+	private SalveAmuletCheckerInfoBox raidStateInfoBox;
 	private SalveAmuletCheckerInfoBox tobSalveAmuletCheckerInfoBox;
 	private SalveAmuletCheckerInfoBox locationSalveAmuletInfoBox;
 
@@ -111,6 +114,7 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		overlayManager.add(mysticRoomOverlay);
 		overlayManager.add(coxLocationOverlay);
 	}
+
 
 	@Override
 	protected void shutDown() throws Exception
@@ -146,7 +150,7 @@ public class SalveAmuletCheckerPlugin extends Plugin
 					//do check for players without salve
 					for (Player player: client.getPlayers()) {
 						if(tobManager.getRaiderNames().contains(player.getName())){
-							if(!isSalveAmuletEquipped(player)){
+							if(!isSalveAmuletEquipped(player) && config.isToxic()){
 								whenSalveAmuletNotEquipped(player);
 							}
 						}
@@ -156,9 +160,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 
 		}
 		if(config.isEnabledInCox()){
-			if(coxManager.isPlayerInCoxParty()){
-				coxManager.setUpRaidParty(client.getSelectedSceneTile());
-			}
 			if(coxManager.isPlayerInCoxRaid()){
 				panel.setActiveMonster(EntityNames.MYSTIC,true);
 				val currentRoom = coxManager.getCurrentRoom(client.getSelectedSceneTile());
@@ -168,18 +169,31 @@ public class SalveAmuletCheckerPlugin extends Plugin
 				val playersMap = coxManager.getPlayersInMysticRoom();
 				playersMap.forEach((player,isInMysticRoom) -> {
 					addPlayerSalveAmuletCheckerInfoBox(player.getName(),isInMysticRoom.toString(), Color.black);
-					if(isInMysticRoom){
-						if(!isSalveAmuletEquipped(player)) {
-							log.debug(player.getName());
-							if(config.isToxic()){
-								whenSalveAmuletNotEquipped(player);
-							}
-						}
+					if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
+						whenSalveAmuletNotEquipped(player);
 					}
 				});
 			}
 		}
 
+	}
+
+	@Subscribe
+	public void onChatMessage(ChatMessage event){
+		String chatMessage = Text.removeTags(event.getMessage());
+		if(config.isEnabledInCox()){
+			coxChatMessageAction(chatMessage);
+		}
+
+	}
+
+	private void coxChatMessageAction(String chatMessage){
+		if(chatMessage.startsWith(coxManager.RAID_START_MESSAGE)){
+			coxManager.setUpRaidParty(client.getSelectedSceneTile());
+		}
+		else if(chatMessage.startsWith(coxManager.RAID_END_MESSAGE)){
+			coxManager.playersInRaid.clear();
+		}
 	}
 
 	public boolean isSalveAmuletEquipped(Player player){
@@ -229,6 +243,12 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		removeInfoBox(coxSalveAmuletCheckerInfoBox);
 		coxSalveAmuletCheckerInfoBox = addInfoBox(itemManager.getImage(ItemID.DRAGON_2H_SWORD), text, toolTip);
 		infoBoxManager.addInfoBox(coxSalveAmuletCheckerInfoBox);
+	}
+
+	private void addRaidStateInfoBox(String text, String toolTip, Color color){
+		removeInfoBox(raidStateInfoBox);
+		raidStateInfoBox = addInfoBox(itemManager.getImage(ItemID.CLEAR_LIQUID), text, toolTip);
+		infoBoxManager.addInfoBox(raidStateInfoBox);
 	}
 
 }
