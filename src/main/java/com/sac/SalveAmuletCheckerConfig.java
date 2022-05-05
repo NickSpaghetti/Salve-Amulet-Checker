@@ -52,7 +52,7 @@ public interface SalveAmuletCheckerConfig extends Config {
 
 	@ConfigItem(
 			keyName = "isToxic",
-			name = "Call out players ",
+			name = "Call out players",
 			description = "Call out players not wearing their Salve Amulet",
 			position = 2
 	)

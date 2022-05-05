@@ -9,8 +9,10 @@ import com.sac.infoboxs.SalveAmuletCheckerInfoBox;
 import com.sac.managers.CoxManager;
 import com.sac.managers.TobManager;
 import com.sac.models.SaRaider;
+import com.sac.overlays.BloatRoomOverlay;
 import com.sac.overlays.CoxLocationOverlay;
 import com.sac.overlays.MysticRoomOverlay;
+import com.sac.overlays.TobLocationOverlay;
 import com.sac.panel.SalveAmuletCheckerPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -68,9 +70,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private InfoBoxManager infoBoxManager;
 
 	@Inject
-	private ChatMessageManager chatMessageManager;
-
-	@Inject
 	private ItemManager itemManager;
 
 	@Inject
@@ -80,18 +79,19 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private MysticRoomOverlay mysticRoomOverlay;
 	@Inject
 	private CoxLocationOverlay coxLocationOverlay;
+	@Inject
+	private BloatRoomOverlay bloatRoomOverlay;
+	@Inject
+	private TobLocationOverlay tobLocationOverlay;
 
 
 	private TobState currentTobState;
 	private SalveAmuletCheckerPanel panel;
 	private NavigationButton navButton;
-	private ArrayList<SaRaider> saRaiders;
 	private SalveAmuletCheckerInfoBox coxSalveAmuletCheckerInfoBox;
 	private SalveAmuletCheckerInfoBox raidStateInfoBox;
-	private SalveAmuletCheckerInfoBox tobSalveAmuletCheckerInfoBox;
 	private SalveAmuletCheckerInfoBox locationSalveAmuletInfoBox;
 
-	//private final BufferedImage coxBufferedImage = itemManager.getImage(ItemID.SALVE_AMULETEI);
 
 	@Override
 	protected void startUp() throws Exception
@@ -113,6 +113,8 @@ public class SalveAmuletCheckerPlugin extends Plugin
 
 		overlayManager.add(mysticRoomOverlay);
 		overlayManager.add(coxLocationOverlay);
+		overlayManager.add(bloatRoomOverlay);
+		overlayManager.add(tobLocationOverlay);
 	}
 
 
@@ -123,9 +125,10 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		panel = null;
 		navButton = null;
 		log.info("Salve Amulet Checker stopped!");
-		removeInfoBox(coxSalveAmuletCheckerInfoBox);
 		overlayManager.remove(mysticRoomOverlay);
 		overlayManager.remove(coxLocationOverlay);
+		overlayManager.add(bloatRoomOverlay);
+		overlayManager.add(tobLocationOverlay);
 	}
 
 
@@ -162,13 +165,8 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		if(config.isEnabledInCox()){
 			if(coxManager.isPlayerInCoxRaid()){
 				panel.setActiveMonster(EntityNames.MYSTIC,true);
-				val currentRoom = coxManager.getCurrentRoom(client.getSelectedSceneTile());
-				if(currentRoom != null){
-					addCoxSalveAmuletCheckerInfoBox(currentRoom.name(),currentRoom.name(),Color.white);
-				}
 				val playersMap = coxManager.getPlayersInMysticRoom();
 				playersMap.forEach((player,isInMysticRoom) -> {
-					addPlayerSalveAmuletCheckerInfoBox(player.getName(),isInMysticRoom.toString(), Color.black);
 					if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
 						whenSalveAmuletNotEquipped(player);
 					}
