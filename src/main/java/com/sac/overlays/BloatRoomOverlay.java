@@ -65,7 +65,7 @@ public class BloatRoomOverlay extends OverlayPanel {
         }
 
         playersNames.forEach((playerName) -> {
-            Player foundPlayer =  client.getPlayers().stream().filter((player) -> player.getName() == playerName).findFirst().orElseGet(() -> null);
+            Player foundPlayer =  client.getPlayers().stream().filter((player) -> player.getName().equals(playerName)).findFirst().orElseGet(() -> null);
             if(foundPlayer != null){
                 boolean isSalveAmuletEquip = plugin.isSalveAmuletEquipped(foundPlayer);
                 Color salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
