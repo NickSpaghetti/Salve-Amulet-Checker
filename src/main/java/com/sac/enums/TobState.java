@@ -6,11 +6,15 @@ public enum TobState {
     NoParty(0),
     InParty(1),
     InTob(2);
-    private final int tobStateValue;
+    private int tobStateValue;
     private static TobState[] states = null;
 
     TobState(int stateValue){
         tobStateValue = stateValue;
+    }
+
+    public int getTobStateValue(){
+        return tobStateValue;
     }
 
     public static TobState fromInteger(int i){
@@ -19,11 +23,13 @@ public enum TobState {
             TobState.states = TobState.values();
         }
 
-        if(!Arrays.asList(states).contains(i)){
+        TobState stateValue = Arrays.stream(TobState.values()).filter(s -> s.getTobStateValue() == i).findFirst().orElse(null);
+        if(stateValue == null)
+        {
             return NoParty;
         }
 
-        return states[i];
+        return stateValue;
     }
 
 

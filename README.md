@@ -18,11 +18,15 @@ When checked an overlay will show up when you are in the mystic room displaying 
 ![Salve Amulet Checker in Mystics](src/main/resources/com/sac/MysticChecker.png)
 ### Enable Salve Amulet Check in Tob
 When checked an overlay will show up when you are in the Bloat room displaying who yes/no if a player is wearing their salve amulet
+
+![Salve Amulet Checker in Mystics](src/main/resources/com/sac/TobSalveAmuletChecker.png)
 ### Show Location in Chambers of Xeric
 A little overlay box will show up displaying the current room you are in.
 
-![Cox Locatoin](src/main/resources/com/sac/CoxLocation.png)
+![Cox Location](src/main/resources/com/sac/CoxLocation.png)
 ### Show Location in Theatre of Blood
 A little overlay box will show up displaying the current room you are in.
+
+![Cox Location](src/main/resources/com/sac/TobLocation.png)
 ### Call out players
 will call out players in the chat if they are not wearing their salve amulet in bloat & mystic room

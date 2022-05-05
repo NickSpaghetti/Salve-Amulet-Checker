@@ -21,6 +21,7 @@ public class TobManager {
 
     private HashSet<String> tobRaiderNames;
     private TobState tobState;
+    private String currentRoom;
 
     public static int MAX_RAIDERS = 5;
     public static final int THEATRE_RAIDERS_VARC = 330;
@@ -55,17 +56,20 @@ public class TobManager {
         Widget widget = client.getWidget(TOB_GROUP_ID, TOB_BOSS_INTERFACE_ID);
         if (widget != null && widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID) != null) {
             Widget childWidget = widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID);
-            return childWidget.getText();
+            if(!childWidget.getText().equals("")){
+                currentRoom = childWidget.getText();
+            }
         }
-        return null;
+        return currentRoom;
     }
 
 
     public TobState getTobState() {
         if (client.getGameState() != GameState.LOGGED_IN) return TobState.NoParty;
 
+        int st = client.getVar(Varbits.THEATRE_OF_BLOOD);
         TobState newRaidState =  TobState.fromInteger(client.getVar(Varbits.THEATRE_OF_BLOOD));
-        if (tobState != newRaidState) {
+        //if (tobState != newRaidState) {
             if (newRaidState == TobState.NoParty || newRaidState == TobState.InParty) {
                 // We're not in a raid
                 resetTobState();
@@ -73,7 +77,7 @@ public class TobManager {
                 tobState = TobState.InTob;
             }
             tobState = newRaidState;
-        }
+        //}
 
         return tobState;
     }
