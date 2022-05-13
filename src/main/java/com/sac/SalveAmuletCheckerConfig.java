@@ -5,7 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-@ConfigGroup("Salve Amulet Checker")
+@ConfigGroup("SalveAmuletChecker")
 public interface SalveAmuletCheckerConfig extends Config {
 
     @ConfigItem(

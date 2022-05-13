@@ -127,8 +127,8 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		log.info("Salve Amulet Checker stopped!");
 		overlayManager.remove(mysticRoomOverlay);
 		overlayManager.remove(coxLocationOverlay);
-		overlayManager.add(bloatRoomOverlay);
-		overlayManager.add(tobLocationOverlay);
+		overlayManager.remove(bloatRoomOverlay);
+		overlayManager.remove(tobLocationOverlay);
 	}
 
 
