@@ -3,24 +3,19 @@ package com.sac.overlays;
 import com.google.inject.Inject;
 import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
-import com.sac.constants.EntityNames;
+import com.sac.enums.EntityNames;
 import com.sac.enums.TobState;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.LineComponent;
-import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Optional;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
@@ -46,7 +41,7 @@ public class BloatRoomOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
 
-        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.GetRoom() == EntityNames.BLOAT){
+        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.GetRoom() == EntityNames.BLOAT.getEntityName()){
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)

@@ -1,37 +1,30 @@
 package com.sac;
 
 import com.google.inject.Provides;
-import javax.inject.Inject;
-
-import com.sac.constants.EntityNames;
+import com.sac.enums.EntityNames;
 import com.sac.enums.TobState;
 import com.sac.infoboxs.SalveAmuletCheckerInfoBox;
 import com.sac.managers.CoxManager;
 import com.sac.managers.TobManager;
-import com.sac.models.SaRaider;
 import com.sac.overlays.BloatRoomOverlay;
 import com.sac.overlays.CoxLocationOverlay;
 import com.sac.overlays.MysticRoomOverlay;
 import com.sac.overlays.TobLocationOverlay;
 import com.sac.panel.SalveAmuletCheckerPanel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import net.runelite.api.*;
+import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
+import net.runelite.api.ItemID;
+import net.runelite.api.Player;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.kit.KitType;
-import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.grounditems.GroundItemsOverlay;
-import net.runelite.client.plugins.grounditems.GroundItemsPlugin;
-import net.runelite.client.plugins.raids.Raid;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -40,10 +33,10 @@ import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
 
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 @Slf4j
 @PluginDescriptor(
@@ -147,9 +140,9 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		if(config.isEnabledInTob()){
 			currentTobState = tobManager.getTobState();
 			if (currentTobState == TobState.InTob){
-				panel.setActiveMonster(EntityNames.BLOAT, true);
+				panel.setActiveMonster(EntityNames.BLOAT.getEntityName(), true);
 				tobManager.LoadRaiders();
-				if(tobManager.GetRoom() == EntityNames.BLOAT){
+				if(tobManager.GetRoom() == EntityNames.BLOAT.getEntityName()){
 					//do check for players without salve
 					for (Player player: client.getPlayers()) {
 						if(tobManager.getRaiderNames().contains(player.getName())){
@@ -164,7 +157,7 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		}
 		if(config.isEnabledInCox()){
 			if(coxManager.isPlayerInCoxRaid()){
-				panel.setActiveMonster(EntityNames.MYSTIC,true);
+				panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
 				val playersMap = coxManager.getPlayersInMysticRoom();
 				playersMap.forEach((player,isInMysticRoom) -> {
 					if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {

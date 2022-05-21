@@ -57,7 +57,7 @@ public class TobManager {
     public TobState getTobState() {
         if (client.getGameState() != GameState.LOGGED_IN) return TobState.NoParty;
 
-        TobState newRaidState =  TobState.fromInteger(client.getVar(Varbits.THEATRE_OF_BLOOD));
+        TobState newRaidState =  TobState.fromInteger(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD));
             if (newRaidState == TobState.NoParty || newRaidState == TobState.InParty) {
                 // We're not in a raid
                 resetTobState();

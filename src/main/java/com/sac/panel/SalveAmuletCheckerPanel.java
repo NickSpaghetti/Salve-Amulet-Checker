@@ -1,32 +1,24 @@
 package com.sac.panel;
+
 import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
-import com.sac.constants.EntityNames;
+import com.sac.enums.EntityNames;
 import lombok.extern.slf4j.Slf4j;
-
+import lombok.val;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
-
 import javax.inject.Inject;
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-
 @Slf4j
 public class SalveAmuletCheckerPanel extends PluginPanel {
 
 
     private JComboBox monsterDropDown;
     private JTextField activeMonsterTextField;
-    private Constructor<EntityNames> EntityNamesConstructor;
     private final JLabel overallIcon = new JLabel();
 
 
@@ -42,30 +34,21 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
     private void loadMonsterDropDown(){
         JPanel monsterDropDownPanel = new JPanel();
         try{
-            Field[] fields = EntityNames.class.getFields();
-            EntityNamesConstructor = EntityNames.class.getDeclaredConstructor();
-            EntityNamesConstructor.setAccessible(true);
-            EntityNames entityNames = EntityNamesConstructor.newInstance();
-            ArrayList<String> values = new ArrayList<String>();
-
-            for(Field field : fields){
-                values.add(field.get(entityNames).toString());
-            }
 
             monsterDropDown = new JComboBox<ComboBoxIconEntity<String>>();
             monsterDropDown.setFocusable(false);
-
-            monsterDropDown.setMaximumRowCount(values.size());
+            val values = EntityNames.values();
+            monsterDropDown.setMaximumRowCount(values.length);
             monsterDropDown.setForeground(Color.WHITE);
             final ComboBoxIconListRenderer renderer = new ComboBoxIconListRenderer();
             renderer.setDefaultText("See Monsters");
             monsterDropDown.setRenderer(renderer);
 
-            for(String mobName : values){
+            for(EntityNames mobName : values){
 
-                final String imageName = mobName.replaceAll("\\s","").concat("Small.png");
+                final String imageName = mobName.getEntityName().replaceAll("\\s","").concat("Small.png");
                 final BufferedImage dropDownIcon = ImageUtil.loadImageResource(SalveAmuletCheckerPlugin.class,imageName );
-                final ComboBoxIconEntity<String> entity = new ComboBoxIconEntity(new ImageIcon(dropDownIcon),mobName,imageName);
+                final ComboBoxIconEntity<String> entity = new ComboBoxIconEntity(new ImageIcon(dropDownIcon),mobName.getEntityName(),imageName);
                 monsterDropDown.addItem(entity);
 
             }
@@ -84,14 +67,8 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
             monsterDropDownPanel.add(monsterDropDown,BorderLayout.NORTH);
             add(monsterDropDownPanel);
         }
-        catch (IllegalAccessException iaex){
-            iaex.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        catch (Exception ex){
+            ex.printStackTrace();
         }
     }
 
