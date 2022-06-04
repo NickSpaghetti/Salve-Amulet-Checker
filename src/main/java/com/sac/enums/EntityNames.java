@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum EntityNames {
-    BLOAT("Pestilent Bloat"),
+    BLOAT("The Pestilent Bloat"),
     MYSTIC("Skeletal Mystic");
     private String entityName;
 
