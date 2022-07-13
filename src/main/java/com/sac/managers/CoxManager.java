@@ -9,9 +9,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.raids.Raid;
 import net.runelite.client.plugins.raids.RaidRoom;
 import net.runelite.client.plugins.raids.solver.Room;
-import net.runelite.client.ws.PartyMember;
-import net.runelite.client.ws.PartyService;
-
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.HashSet;
