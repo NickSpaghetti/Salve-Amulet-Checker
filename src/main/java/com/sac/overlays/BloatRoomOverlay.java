@@ -41,7 +41,7 @@ public class BloatRoomOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
 
-        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.GetRoom() == EntityNames.BLOAT.getEntityName()){
+        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName())){
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)
