@@ -36,7 +36,7 @@ public class CoxManager {
     public boolean isPlayerInCoxRaid() {
         boolean isInRaid = false;
         if (client.getGameState() == GameState.LOGGED_IN) {
-            isInRaid = client.getVar(Varbits.IN_RAID) != 0;
+            isInRaid = client.getVarbitValue(Varbits.IN_RAID) != 0;
         }
 
         return isInRaid;
@@ -45,7 +45,7 @@ public class CoxManager {
     public boolean isRaidInProgress(){
         boolean isRaidInProgress = false;
         if (client.getGameState() == GameState.LOGGED_IN) {
-            isRaidInProgress = client.getVar(Varbits.RAID_STATE) == 1;
+            isRaidInProgress = client.getVarbitValue(Varbits.RAID_STATE) == 1;
         }
         return isRaidInProgress;
     }

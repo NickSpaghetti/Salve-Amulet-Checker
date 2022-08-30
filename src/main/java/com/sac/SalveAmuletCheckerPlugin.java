@@ -22,6 +22,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.kit.KitType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -89,19 +90,10 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		// Can't @Inject because it is nulled out in shutdown()
-		panel = injector.getInstance(SalveAmuletCheckerPanel.class);
+		if(config.isSidePanelVisible()){
+			addNavBar();
+		}
 
-		InputStream in = SalveAmuletCheckerPlugin.class.getResourceAsStream("salveAmuletEi.png");
-
-		BufferedImage ICON = ImageUtil.loadImageResource(SalveAmuletCheckerPlugin.class, "salveAmuletEi.png");
-		navButton = NavigationButton.builder()
-				.tooltip("Salve Amulet Checker")
-				.icon(ICON)
-				.priority(10)
-				.panel(panel)
-				.build();
-		clientToolbar.addNavigation(navButton);
 		log.info("Salve Amulet Checker started!");
 
 		overlayManager.add(mysticRoomOverlay);
@@ -131,6 +123,43 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		return configManager.getConfig(SalveAmuletCheckerConfig.class);
 	}
 
+
+	public void addNavBar(){
+		// Can't @Inject because it is nulled out in shutdown()
+		panel = injector.getInstance(SalveAmuletCheckerPanel.class);
+
+		BufferedImage ICON = ImageUtil.loadImageResource(SalveAmuletCheckerPlugin.class, "salveAmuletEi.png");
+		navButton = NavigationButton.builder()
+				.tooltip("Salve Amulet Checker")
+				.icon(ICON)
+				.priority(10)
+				.panel(panel)
+				.build();
+		clientToolbar.addNavigation(navButton);
+	}
+
+	public void removeNavBar(){
+		if(navButton != null && panel != null){
+			clientToolbar.removeNavigation(navButton);
+			navButton = null;
+			panel = null;
+		}
+	}
+
+	@Subscribe()
+	public void onConfigChanged(ConfigChanged event){
+		String configName = event.getKey();
+		if(configName.equals("isSidePanelVisible")){
+			boolean isSidePanelVisible =  Boolean.parseBoolean(event.getNewValue());
+			if(isSidePanelVisible && navButton == null && panel == null){
+				addNavBar();
+			}
+			else {
+				removeNavBar();
+			}
+		}
+	}
+
 	@Subscribe(priority = -1)
 	public void onGameTick(GameTick event) {
 		computeActiveCheck();
@@ -140,9 +169,11 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		if(config.isEnabledInTob()){
 			currentTobState = tobManager.getTobState();
 			if (currentTobState == TobState.InTob){
-				panel.setActiveMonster(EntityNames.BLOAT.getEntityName(), true);
+				if(config.isSidePanelVisible()){
+					panel.setActiveMonster(EntityNames.BLOAT.getEntityName(), true);
+				}
 				tobManager.LoadRaiders();
-				if(tobManager.GetRoom() == EntityNames.BLOAT.getEntityName()){
+				if(tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName())){
 					//do check for players without salve
 					for (Player player: client.getPlayers()) {
 						if(tobManager.getRaiderNames().contains(player.getName())){
@@ -157,7 +188,9 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		}
 		if(config.isEnabledInCox()){
 			if(coxManager.isPlayerInCoxRaid()){
-				panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
+				if(config.isSidePanelVisible()){
+					panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
+				}
 				val playersMap = coxManager.getPlayersInMysticRoom();
 				playersMap.forEach((player,isInMysticRoom) -> {
 					if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
@@ -179,10 +212,10 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	}
 
 	private void coxChatMessageAction(String chatMessage){
-		if(chatMessage.startsWith(coxManager.RAID_START_MESSAGE)){
+		if(chatMessage.startsWith(CoxManager.RAID_START_MESSAGE)){
 			coxManager.setUpRaidParty(client.getSelectedSceneTile());
 		}
-		else if(chatMessage.startsWith(coxManager.RAID_END_MESSAGE)){
+		else if(chatMessage.startsWith(CoxManager.RAID_END_MESSAGE)){
 			coxManager.playersInRaid.clear();
 		}
 	}
