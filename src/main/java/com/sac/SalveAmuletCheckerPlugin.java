@@ -37,7 +37,6 @@ import net.runelite.client.util.Text;
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 
 @Slf4j
 @PluginDescriptor(
