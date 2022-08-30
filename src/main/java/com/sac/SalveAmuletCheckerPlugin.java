@@ -128,8 +128,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		// Can't @Inject because it is nulled out in shutdown()
 		panel = injector.getInstance(SalveAmuletCheckerPanel.class);
 
-		InputStream in = SalveAmuletCheckerPlugin.class.getResourceAsStream("salveAmuletEi.png");
-
 		BufferedImage ICON = ImageUtil.loadImageResource(SalveAmuletCheckerPlugin.class, "salveAmuletEi.png");
 		navButton = NavigationButton.builder()
 				.tooltip("Salve Amulet Checker")
