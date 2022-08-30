@@ -12,6 +12,8 @@ Checks which players do not have their Salve Amulet equip at Bloat Or Mystics.
 
 [Call out players](###call-out-players)
 
+[Remove navigation button from side panel](###navigation-button-visible)
+
 ### Enable Salve Amulet Check in Cox
 When checked an overlay will show up when you are in the mystic room displaying who yes/no if a player is wearing their salve amulet
 
@@ -30,3 +32,6 @@ A little overlay box will show up displaying the current room you are in.
 ![Cox Location](src/main/resources/com/sac/TobLocation.png)
 ### Call out players
 will call out players in the chat if they are not wearing their salve amulet in bloat & mystic room
+
+### Navigation button visible
+When unchecked will remove the Salve Amulet (e) icon from the Navigation side panel.
