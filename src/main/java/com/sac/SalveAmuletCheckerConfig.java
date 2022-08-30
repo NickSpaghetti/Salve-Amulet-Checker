@@ -63,7 +63,7 @@ public interface SalveAmuletCheckerConfig extends Config {
     @ConfigItem(
             keyName = "isSidePanelVisible",
             name = "Toggle Side Panel",
-            description = "When disabled the Side Panel Button will be removed.  Requires Runelite restart",
+            description = "When disabled the Side Panel Button will be removed.",
             position = 3
     )
     default boolean isSidePanelVisible() {
