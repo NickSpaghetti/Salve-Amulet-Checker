@@ -1,5 +1,6 @@
 package com.sac;
 
+import lombok.experimental.FieldNameConstants;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -60,4 +61,14 @@ public interface SalveAmuletCheckerConfig extends Config {
 	default boolean isToxic() {
 		return false;
 	}
+
+    @ConfigItem(
+            keyName = "isSidePanelVisible",
+            name = "Toggle Side Panel",
+            description = "When disabled the Side Panel Button will be removed.  Requires Runelite restart",
+            position = 3
+    )
+    default boolean isSidePanelVisible() {
+        return true;
+    }
 }
