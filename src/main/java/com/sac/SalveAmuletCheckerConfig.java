@@ -1,10 +1,8 @@
 package com.sac;
 
-import lombok.experimental.FieldNameConstants;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("SalveAmuletChecker")
 public interface SalveAmuletCheckerConfig extends Config {
