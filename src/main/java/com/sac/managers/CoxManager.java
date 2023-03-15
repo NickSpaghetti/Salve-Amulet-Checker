@@ -27,7 +27,7 @@ public class CoxManager {
     public boolean isPlayerInCoxParty() {
         boolean isInParty = false;
         if (client.getGameState() == GameState.LOGGED_IN) {
-            isInParty = client.getVarbitValue(VarPlayer.IN_RAID_PARTY.getId()) != -1;
+            isInParty = client.getVarbitValue(VarPlayer.IN_RAID_PARTY) != -1;
         }
 
         return isInParty;
