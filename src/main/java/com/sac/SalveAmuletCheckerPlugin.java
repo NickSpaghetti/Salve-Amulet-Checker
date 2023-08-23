@@ -13,10 +13,7 @@ import com.sac.overlays.TobLocationOverlay;
 import com.sac.panel.SalveAmuletCheckerPanel;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.ItemID;
-import net.runelite.api.Player;
+import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.kit.KitType;
@@ -37,6 +34,7 @@ import net.runelite.client.util.Text;
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 @Slf4j
 @PluginDescriptor(
@@ -100,7 +98,6 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		overlayManager.add(bloatRoomOverlay);
 		overlayManager.add(tobLocationOverlay);
 	}
-
 
 	@Override
 	protected void shutDown() throws Exception
@@ -185,20 +182,17 @@ public class SalveAmuletCheckerPlugin extends Plugin
 			}
 
 		}
-		if(config.isEnabledInCox()){
-			if(coxManager.isPlayerInCoxRaid()){
-				if(config.isSidePanelVisible()){
-					panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
-				}
-				val playersMap = coxManager.getPlayersInMysticRoom();
-				playersMap.forEach((player,isInMysticRoom) -> {
-					if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
-						whenSalveAmuletNotEquipped(player);
-					}
-				});
+		if(config.isEnabledInCox() && coxManager.isPlayerInCoxRaid()){
+			if(config.isSidePanelVisible()){
+				panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
 			}
+			val playersMap = coxManager.getPlayersInMysticRoom();
+			playersMap.forEach((player,isInMysticRoom) -> {
+				if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
+						whenSalveAmuletNotEquipped(player);
+				}
+			});
 		}
-
 	}
 
 	@Subscribe
@@ -207,15 +201,18 @@ public class SalveAmuletCheckerPlugin extends Plugin
 		if(config.isEnabledInCox()){
 			coxChatMessageAction(chatMessage);
 		}
-
 	}
 
 	private void coxChatMessageAction(String chatMessage){
+		Player player = client.getLocalPlayer();
+		if(player == null){
+			return;
+		}
 		if(chatMessage.startsWith(CoxManager.RAID_START_MESSAGE)){
-			coxManager.setUpRaidParty(client.getSelectedSceneTile());
+			coxManager.setUpRaidParty(player.getWorldLocation().getPlane(),player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY());
 		}
 		else if(chatMessage.startsWith(CoxManager.RAID_END_MESSAGE)){
-			coxManager.playersInRaid.clear();
+			coxManager.clearRaiders();
 		}
 	}
 
