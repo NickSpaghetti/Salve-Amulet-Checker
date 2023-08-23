@@ -5,8 +5,10 @@ import lombok.val;
 import net.runelite.api.*;
 import net.runelite.client.plugins.PluginDescriptor;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 @PluginDescriptor(
         name = "Salve Amulet Checker",
@@ -19,8 +21,7 @@ public class CoxManager {
     private Client client;
 
     @Getter
-    public HashSet<Player> playersInRaid;
-
+    private HashSet<Player> playersInRaid;
     public final static String RAID_START_MESSAGE = "The raid has begun!";
     public final static String RAID_END_MESSAGE = "As the Great Olm collapses, the crystal blocking your exit has been shattered";
 
@@ -80,7 +81,23 @@ public class CoxManager {
             int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
 
-            if ((template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START)){
+            if (template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START){
+                coxRaidParty.clear();
+                coxRaidParty.addAll(client.getPlayers());
+                playersInRaid = coxRaidParty;
+            }
+
+        }
+
+    }
+
+    public void setUpRaidParty(int currentPlane, int x, int y) {
+        val coxRaidParty = new HashSet<Player>();
+        if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxParty()) {
+            int chunkData = client.getInstanceTemplateChunks()[currentPlane][(x) / 8][y / 8];
+            InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
+
+            if (template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START){
                 coxRaidParty.clear();
                 coxRaidParty.addAll(client.getPlayers());
                 playersInRaid = coxRaidParty;
@@ -119,7 +136,15 @@ public class CoxManager {
 
     public void removePlayerFromParty(String playerName)
     {
-        playersInRaid.removeIf(player -> (player.getName() == playerName));
+        playersInRaid.removeIf(player -> (Objects.equals(player.getName(), playerName)));
+    }
+
+    public ArrayList<Player> GetRaidParty() {
+        return new ArrayList<Player>(playersInRaid);
+    }
+
+    public void clearRaiders(){
+        playersInRaid.clear();
     }
 
 }
