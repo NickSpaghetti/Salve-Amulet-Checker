@@ -3,6 +3,7 @@ package com.sac.overlays;
 import com.google.inject.Inject;
 import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
+import lombok.val;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.client.game.ItemManager;
@@ -10,13 +11,12 @@ import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.Set;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
@@ -35,7 +35,7 @@ public class MysticRoomOverlay extends OverlayPanel {
     private MysticRoomOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config, ItemManager itemManager, SpriteManager spriteManager) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(OverlayPriority.LOW);
+        setPriority(MysticRoomOverlay.PRIORITY_LOW);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
@@ -47,32 +47,27 @@ public class MysticRoomOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-
         Player player = client.getLocalPlayer();
-        if(player != null && plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.isInMysticRoom(player.getWorldLocation().getPlane(),player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY())){
+        if (player != null && plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.isInMysticRoom(player.getWorldLocation().getPlane(), player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY())) {
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)
                     .build());
-            DisplayNames(plugin.coxManager.getPlayersInMysticRoom());
+            DisplayNames(plugin.coxManager.getPlayersActiveInMysticRoom());
         }
 
         return super.render(graphics);
     }
 
 
-    private void DisplayNames(HashMap<Player, Boolean> playersInMysticRoom){
-        if(playersInMysticRoom == null){
+    private void DisplayNames(Set<Player> playersInMysticRoom) {
+        if (playersInMysticRoom == null) {
             return;
         }
 
-        playersInMysticRoom.forEach((player,isInMysticRoom) -> {
-            Color salveAmuletEquipColor = isInMysticRoom ? Color.GREEN : Color.red;
-            boolean isSalveAmuletEquip = isInMysticRoom;
-            if(isInMysticRoom){
-                isSalveAmuletEquip =  plugin.isSalveAmuletEquipped(player);
-                salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
-            }
+        playersInMysticRoom.forEach((player) -> {
+            val isSalveAmuletEquip = plugin.isSalveAmuletEquipped(player);
+            val salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(player.getName())
                     .right(isSalveAmuletEquip ? "Yes" : "No")
@@ -80,7 +75,6 @@ public class MysticRoomOverlay extends OverlayPanel {
                     .rightColor(salveAmuletEquipColor)
                     .build());
         });
-
-        }
+    }
 
 }
