@@ -14,6 +14,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+
 import java.awt.*;
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class MysticRoomOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
         Player player = client.getLocalPlayer();
-        if(player != null && plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.isInMysticRoom(player.getWorldLocation().getPlane(),player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY())){
+        if (player != null && plugin.coxManager.isPlayerInCoxRaid() && plugin.coxManager.isInMysticRoom(player.getWorldLocation().getPlane(), player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY())) {
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)
@@ -60,7 +61,7 @@ public class MysticRoomOverlay extends OverlayPanel {
 
 
     private void DisplayNames(Set<Player> playersInMysticRoom) {
-        if(playersInMysticRoom == null){
+        if (playersInMysticRoom == null) {
             return;
         }
 
@@ -73,7 +74,7 @@ public class MysticRoomOverlay extends OverlayPanel {
                     .leftColor(Color.white)
                     .rightColor(salveAmuletEquipColor)
                     .build());
-            });
-        }
+        });
+    }
 
 }
