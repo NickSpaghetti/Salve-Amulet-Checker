@@ -5,10 +5,8 @@ import lombok.val;
 import net.runelite.api.*;
 import net.runelite.client.plugins.PluginDescriptor;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @PluginDescriptor(
         name = "Salve Amulet Checker",
@@ -54,7 +52,7 @@ public class CoxManager {
     public boolean isInMysticRoom(Tile currentTile) {
         boolean isInMysticTile = false;
         if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxRaid()) {
-            int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
+            int chunkData = client.getLocalPlayer().getWorldView().getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
             if (template == InstanceTemplates.RAIDS_MYSTICS){
                 isInMysticTile = true;
@@ -66,7 +64,7 @@ public class CoxManager {
     public boolean isInMysticRoom(int currentPlane, int x, int y) {
         boolean isInMysticTile = false;
         if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxRaid()) {
-            int chunkData = client.getInstanceTemplateChunks()[currentPlane][(x) / 8][y / 8];
+            int chunkData = client.getLocalPlayer().getWorldView().getInstanceTemplateChunks()[currentPlane][(x) / 8][y / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
             if (template == InstanceTemplates.RAIDS_MYSTICS){
                 isInMysticTile = true;
@@ -78,12 +76,12 @@ public class CoxManager {
     public void setUpRaidParty(Tile currentTile) {
         val coxRaidParty = new HashSet<Player>();
         if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxParty() && currentTile != null) {
-            int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
+            int chunkData = client.getLocalPlayer().getWorldView().getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
 
             if (template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START){
-                coxRaidParty.clear();
-                coxRaidParty.addAll(client.getPlayers());
+                playersInRaid.clear();
+                client.getLocalPlayer().getWorldView().players().forEach(player -> coxRaidParty.add(player));
                 playersInRaid = coxRaidParty;
             }
 
@@ -94,12 +92,11 @@ public class CoxManager {
     public void setUpRaidParty(int currentPlane, int x, int y) {
         val coxRaidParty = new HashSet<Player>();
         if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxParty()) {
-            int chunkData = client.getInstanceTemplateChunks()[currentPlane][(x) / 8][y / 8];
+            int chunkData = client.getLocalPlayer().getWorldView().getInstanceTemplateChunks()[currentPlane][(x) / 8][y / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
-
             if (template == InstanceTemplates.RAIDS_LOBBY || template == InstanceTemplates.RAIDS_START){
-                coxRaidParty.clear();
-                coxRaidParty.addAll(client.getPlayers());
+                //playersInRaid.clear();
+                client.getLocalPlayer().getWorldView().players().forEach(player -> coxRaidParty.add(player));
                 playersInRaid = coxRaidParty;
             }
 
@@ -109,7 +106,7 @@ public class CoxManager {
 
     public InstanceTemplates getCurrentRoom(Tile currentTile){
         if (client.getGameState() == GameState.LOGGED_IN && isPlayerInCoxRaid() && currentTile != null) {
-            int chunkData = client.getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
+            int chunkData = client.getTopLevelWorldView().getInstanceTemplateChunks()[currentTile.getPlane()][(currentTile.getSceneLocation().getX()) / 8][currentTile.getSceneLocation().getY() / 8];
             InstanceTemplates template = InstanceTemplates.findMatch(chunkData);
             return template;
         }
@@ -132,6 +129,20 @@ public class CoxManager {
             }
         }
         return playersInMysticRoom;
+    }
+
+    public Set<Player> getPlayersActiveInMysticRoom() {
+        if(playersInRaid == null){
+            return Collections.emptySet();
+        }
+
+        return playersInRaid.stream()
+                .filter((player -> isInMysticRoom(
+                        player.getWorldLocation().getPlane()
+                        ,player.getLocalLocation().getSceneX()
+                        ,player.getLocalLocation().getSceneY())
+                ))
+                .collect(Collectors.toSet());
     }
 
     public void removePlayerFromParty(String playerName)

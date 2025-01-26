@@ -3,7 +3,6 @@ package com.sac;
 import com.google.inject.Provides;
 import com.sac.enums.EntityNames;
 import com.sac.enums.TobState;
-import com.sac.infoboxs.SalveAmuletCheckerInfoBox;
 import com.sac.managers.CoxManager;
 import com.sac.managers.TobManager;
 import com.sac.overlays.BloatRoomOverlay;
@@ -26,15 +25,12 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.ui.overlay.infobox.InfoBox;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
-
 import javax.inject.Inject;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @PluginDescriptor(
@@ -79,9 +75,16 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	private TobState currentTobState;
 	private SalveAmuletCheckerPanel panel;
 	private NavigationButton navButton;
-	private SalveAmuletCheckerInfoBox coxSalveAmuletCheckerInfoBox;
-	private SalveAmuletCheckerInfoBox raidStateInfoBox;
-	private SalveAmuletCheckerInfoBox locationSalveAmuletInfoBox;
+
+	private static final Set<Integer> SALVE_AMULET_IDS = Set.of(
+			ItemID.SALVE_AMULET,
+			ItemID.SALVE_AMULET_E,
+			ItemID.SALVE_AMULETEI,
+			ItemID.SALVE_AMULETI_26763,
+			ItemID.SALVE_AMULETI_25250,
+			ItemID.SALVE_AMULETEI_25278,
+			ItemID.SALVE_AMULETEI_26782
+	);
 
 
 	@Override
@@ -162,43 +165,58 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	}
 
 	private void computeActiveCheck(){
-		if(config.isEnabledInTob()){
-			currentTobState = tobManager.getTobState();
-			if (currentTobState == TobState.InTob){
-				if(config.isSidePanelVisible()){
-					panel.setActiveMonster(EntityNames.BLOAT.getEntityName(), true);
-				}
-				tobManager.LoadRaiders();
-				if(tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName())){
-					//do check for players without salve
-					for (Player player: client.getPlayers()) {
-						if(tobManager.getRaiderNames().contains(player.getName())){
-							if(!isSalveAmuletEquipped(player) && config.isToxic()){
-								whenSalveAmuletNotEquipped(player);
-							}
-						}
-					}
-				}
-			}
+		HandelTobCompute();
+		HandelCoxCompute();
 
+	}
+	private void HandelTobCompute(){
+		if (!config.isEnabledInTob()) {
+			return;
 		}
-		if(config.isEnabledInCox() && coxManager.isPlayerInCoxRaid()){
-			if(config.isSidePanelVisible()){
-				panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(),true);
+
+		currentTobState = tobManager.getTobState();
+		if (currentTobState != TobState.InTob) {
+			return;
+		}
+
+		if (config.isSidePanelVisible()) {
+			panel.setActiveMonster(EntityNames.BLOAT.getEntityName(), true);
+		}
+
+		tobManager.LoadRaiders();
+		if (!tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName()) || !config.isToxic()) {
+			return;
+		}
+
+		for (Player player: client.getLocalPlayer().getWorldView().players()) {
+			if(tobManager.getRaiderNames().contains(player.getName()) && !isSalveAmuletEquipped(player)){
+				whenSalveAmuletNotEquipped(player);
 			}
-			val playersMap = coxManager.getPlayersInMysticRoom();
-			playersMap.forEach((player,isInMysticRoom) -> {
-				if(isInMysticRoom && !isSalveAmuletEquipped(player) && config.isToxic()) {
-						whenSalveAmuletNotEquipped(player);
-				}
-			});
 		}
+
+	}
+	private void HandelCoxCompute(){
+		if (!config.isEnabledInCox() || !coxManager.isPlayerInCoxRaid()) {
+			return;
+		}
+		if (config.isSidePanelVisible()) {
+			panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(), true);
+		}
+		if (!config.isToxic()) {
+			return;
+		}
+		val playersMap = coxManager.getPlayersActiveInMysticRoom();
+		playersMap.forEach((player) -> {
+			if(!isSalveAmuletEquipped(player)) {
+				whenSalveAmuletNotEquipped(player);
+			}
+		});
 	}
 
 	@Subscribe
 	public void onChatMessage(ChatMessage event){
 		String chatMessage = Text.removeTags(event.getMessage());
-		if(config.isEnabledInCox()){
+		if(config.isEnabledInCox() && coxManager.isPlayerInCoxRaid()){
 			coxChatMessageAction(chatMessage);
 		}
 	}
@@ -222,53 +240,12 @@ public class SalveAmuletCheckerPlugin extends Plugin
 	}
 
 	private void whenSalveAmuletNotEquipped(Player offendingPlayer){
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE,offendingPlayer.getName(),String.format("%s Is not wearing their Salve Amulet!",offendingPlayer.getName()),null);
+
+		client.addChatMessage(ChatMessageType.PUBLICCHAT,offendingPlayer.getName(),String.format("%s Is not wearing their Salve Amulet!",offendingPlayer.getName()),null);
 	}
 
 	public boolean isSalveAmulet(int itemId){
-		boolean isSalveAmulet = false;
-		if(itemId == ItemID.SALVE_AMULET || itemId == ItemID.SALVE_AMULET_E || itemId == ItemID.SALVE_AMULETEI){
-			isSalveAmulet = true;
-		}
-		return isSalveAmulet;
-	}
-
-	private SalveAmuletCheckerInfoBox addInfoBox(BufferedImage image, String text, String toolTip){
-		val infoBox = new SalveAmuletCheckerInfoBox(image,this);
-		infoBox.setInfoBoxText(text);
-		infoBox.setTooltip(toolTip);
-		return infoBox;
-	}
-
-	private void removeInfoBox(InfoBox infoBox){
-		infoBoxManager.removeInfoBox(infoBox);
-		infoBox = null;
-	}
-
-	private SalveAmuletCheckerInfoBox createInfoBox(BufferedImage image, String text, String toolTip, Color textBoxColor){
-		val salveAmuletInfoBox = new SalveAmuletCheckerInfoBox(image,this);
-		salveAmuletInfoBox.setInfoBoxText(text);
-		salveAmuletInfoBox.setTooltip(toolTip);
-		salveAmuletInfoBox.setInfoBoxTextColor(textBoxColor);
-		return salveAmuletInfoBox;
-	}
-
-	private void addCoxSalveAmuletCheckerInfoBox(String text, String toolTip, Color color) {
-		removeInfoBox(locationSalveAmuletInfoBox);
-		locationSalveAmuletInfoBox = addInfoBox(itemManager.getImage(ItemID.SALVE_AMULETEI), text, toolTip);
-		infoBoxManager.addInfoBox(locationSalveAmuletInfoBox);
-	}
-
-	private void addPlayerSalveAmuletCheckerInfoBox(String text, String toolTip, Color color){
-		removeInfoBox(coxSalveAmuletCheckerInfoBox);
-		coxSalveAmuletCheckerInfoBox = addInfoBox(itemManager.getImage(ItemID.DRAGON_2H_SWORD), text, toolTip);
-		infoBoxManager.addInfoBox(coxSalveAmuletCheckerInfoBox);
-	}
-
-	private void addRaidStateInfoBox(String text, String toolTip, Color color){
-		removeInfoBox(raidStateInfoBox);
-		raidStateInfoBox = addInfoBox(itemManager.getImage(ItemID.CLEAR_LIQUID), text, toolTip);
-		infoBoxManager.addInfoBox(raidStateInfoBox);
+		return SALVE_AMULET_IDS.contains(itemId);
 	}
 
 }
