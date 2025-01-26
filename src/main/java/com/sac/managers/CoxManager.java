@@ -137,11 +137,12 @@ public class CoxManager {
         }
 
         return playersInRaid.stream()
-                .filter((player -> isInMysticRoom(
-                        player.getWorldLocation().getPlane()
-                        ,player.getLocalLocation().getSceneX()
-                        ,player.getLocalLocation().getSceneY())
-                ))
+                .filter((player ->
+                        isInMysticRoom(
+                            player.getWorldLocation().getPlane()
+                            ,player.getLocalLocation().getSceneX()
+                            ,player.getLocalLocation().getSceneY()))
+                )
                 .collect(Collectors.toSet());
     }
 
