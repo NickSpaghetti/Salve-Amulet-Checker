@@ -4,12 +4,12 @@ import com.sac.enums.TobState;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Varbits;
+import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.util.HashSet;
-import static net.runelite.api.widgets.WidgetID.TOB_GROUP_ID;
 
 public class TobManager {
 
@@ -43,10 +43,10 @@ public class TobManager {
     }
 
     public String GetRoom(){
-        Widget widget = client.getWidget(TOB_GROUP_ID, TOB_BOSS_INTERFACE_ID);
+        Widget widget = client.getWidget(InterfaceID.TOB, TOB_BOSS_INTERFACE_ID);
         if (widget != null && widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID) != null) {
             Widget childWidget = widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID);
-            if(!childWidget.getText().equals("")){
+            if(childWidget != null && !childWidget.getText().isEmpty()){
                 currentRoom = childWidget.getText();
             }
         }
