@@ -6,10 +6,7 @@ import com.sac.SalveAmuletCheckerPlugin;
 import com.sac.enums.TobState;
 import lombok.val;
 import net.runelite.api.Client;
-import net.runelite.client.ui.overlay.OverlayMenuEntry;
-import net.runelite.client.ui.overlay.OverlayPanel;
-import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
+import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
@@ -27,7 +24,7 @@ public class TobLocationOverlay extends OverlayPanel {
     private TobLocationOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(OverlayPriority.LOW);
+        setPriority(Overlay.PRIORITY_LOW);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
@@ -38,9 +35,9 @@ public class TobLocationOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
 
-        if (plugin.tobManager.getTobState() == TobState.InTob) {
+        if (config.isLocationVisibleInTob() && plugin.tobManager.getTobState() == TobState.InTob) {
             val currentRoom = plugin.tobManager.GetRoom();
-            if (currentRoom != null && currentRoom != "") {
+            if (currentRoom != null && !currentRoom.isEmpty()) {
                 panelComponent.getChildren().add(TitleComponent.builder()
                         .text(currentRoom)
                         .color(Color.white)
