@@ -24,7 +24,7 @@ public class TobLocationOverlay extends OverlayPanel {
     private TobLocationOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(Overlay.PRIORITY_HIGH);
+        setPriority(Overlay.PRIORITY_LOW);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
