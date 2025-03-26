@@ -7,10 +7,7 @@ import lombok.val;
 import net.runelite.api.Client;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
-import net.runelite.client.ui.overlay.OverlayMenuEntry;
-import net.runelite.client.ui.overlay.OverlayPanel;
-import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
+import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 import net.runelite.client.util.Text;
@@ -33,7 +30,7 @@ public class CoxLocationOverlay extends OverlayPanel {
     private CoxLocationOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config, ItemManager itemManager, SpriteManager spriteManager) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(OverlayPriority.LOW);
+        setPriority(Overlay.PRIORITY_HIGH);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
@@ -45,10 +42,11 @@ public class CoxLocationOverlay extends OverlayPanel {
 
     @Override
     public Dimension render(Graphics2D graphics) {
-
-        if (config.isLocationVisibleInCox() && client.getSelectedSceneTile() != null && plugin.coxManager.isPlayerInCoxRaid()) {
-            val currentRoom = plugin.coxManager.getCurrentRoom(client.getSelectedSceneTile());
+        val currentPlayerTile = client.getLocalPlayer().getWorldView().getSelectedSceneTile();
+        if (config.isLocationVisibleInCox() && currentPlayerTile != null && plugin.coxManager.isPlayerInCoxRaid()) {
+            val currentRoom = plugin.coxManager.getCurrentRoom(currentPlayerTile);
             if (currentRoom != null) {
+                panelComponent.setWrap(true);
                 panelComponent.getChildren().add(TitleComponent.builder()
                         .text(Text.titleCase(currentRoom))
                         .color(Color.white)
