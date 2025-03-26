@@ -30,7 +30,7 @@ public class CoxLocationOverlay extends OverlayPanel {
     private CoxLocationOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config, ItemManager itemManager, SpriteManager spriteManager) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(Overlay.PRIORITY_HIGH);
+        setPriority(Overlay.PRIORITY_LOW);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
