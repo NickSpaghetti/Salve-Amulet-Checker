@@ -36,7 +36,7 @@ will call out players in the chat if they are not wearing their salve amulet in 
 ### Navigation button visible
 When unchecked will remove the Salve Amulet (e) icon from the Navigation side panel.
 
-### Building the Project locally in IntelliJ
+## Building the Project locally in IntelliJ
 1. You must have installed Java 11 Eclipse Temurin (AdoptOpenJDK) installed.
 2. In the sidebar navigate to`src/test/java/com/sac/SalveAmuletCheckerPluginTest.java` then right click and Select
 `More Run/Debug` => `Modify Run Configuration...`
