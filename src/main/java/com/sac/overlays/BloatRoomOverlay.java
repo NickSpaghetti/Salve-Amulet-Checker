@@ -3,14 +3,13 @@ package com.sac.overlays;
 import com.google.inject.Inject;
 import com.sac.SalveAmuletCheckerConfig;
 import com.sac.SalveAmuletCheckerPlugin;
-import com.sac.enums.EntityNames;
 import com.sac.enums.TobState;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
@@ -30,7 +29,7 @@ public class BloatRoomOverlay extends OverlayPanel {
     private BloatRoomOverlay(Client client, SalveAmuletCheckerPlugin plugin, SalveAmuletCheckerConfig config) {
         super(plugin);
         setPosition(OverlayPosition.TOP_LEFT);
-        setPriority(OverlayPriority.LOW);
+        setPriority(Overlay.PRIORITY_LOW);
         this.client = client;
         this.plugin = plugin;
         this.config = config;
@@ -41,7 +40,7 @@ public class BloatRoomOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
 
-        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName())){
+        if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.isBloatActive()){
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)
@@ -60,7 +59,7 @@ public class BloatRoomOverlay extends OverlayPanel {
         }
 
         playersNames.forEach((playerName) -> {
-            Player foundPlayer =  client.getPlayers().stream().filter((player) -> player.getName().equals(playerName)).findFirst().orElseGet(() -> null);
+            Player foundPlayer =  client.getLocalPlayer().getWorldView().players().stream().filter((player) -> player.getName().equals(playerName)).findFirst().orElseGet(() -> null);
             if(foundPlayer != null){
                 boolean isSalveAmuletEquip = plugin.isSalveAmuletEquipped(foundPlayer);
                 Color salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;

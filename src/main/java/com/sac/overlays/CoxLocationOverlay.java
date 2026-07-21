@@ -8,6 +8,7 @@ import net.runelite.api.Client;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.ui.overlay.*;
+import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 import net.runelite.client.util.Text;
@@ -46,9 +47,14 @@ public class CoxLocationOverlay extends OverlayPanel {
         if (config.isLocationVisibleInCox() && currentPlayerTile != null && plugin.coxManager.isPlayerInCoxRaid()) {
             val currentRoom = plugin.coxManager.getCurrentRoom(currentPlayerTile);
             if (currentRoom != null) {
+                String roomName = Text.titleCase(currentRoom);
                 panelComponent.setWrap(true);
+                panelComponent.setPreferredSize(new Dimension(
+                        Math.max(ComponentConstants.STANDARD_WIDTH, graphics.getFontMetrics().stringWidth(roomName) + 14),
+                        0
+                ));
                 panelComponent.getChildren().add(TitleComponent.builder()
-                        .text(Text.titleCase(currentRoom))
+                        .text(roomName)
                         .color(Color.white)
                         .build());
             }
