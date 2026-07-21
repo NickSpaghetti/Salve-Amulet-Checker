@@ -15,6 +15,7 @@ import lombok.val;
 import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.api.kit.KitType;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -32,6 +33,8 @@ import net.runelite.client.util.Text;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @PluginDescriptor(
@@ -76,15 +79,23 @@ public class SalveAmuletCheckerPlugin extends Plugin {
     private SalveAmuletCheckerPanel panel;
     private NavigationButton navButton;
 
-    private static final Set<Integer> SALVE_AMULET_IDS = Set.of(
-            ItemID.SALVE_AMULET,
-            ItemID.SALVE_AMULET_E,
-            ItemID.SALVE_AMULETEI,
-            ItemID.SALVE_AMULETI_26763,
-            ItemID.SALVE_AMULETI_25250,
-            ItemID.SALVE_AMULETEI_25278,
-            ItemID.SALVE_AMULETEI_26782
+    // Only imbued variants give a bonus for ranged/magic (unimbued Salve amulet/amulet(e) are melee-only), so
+    // Mystics (mixed combat styles) requires an imbued amulet.
+    private static final Set<Integer> IMBUED_SALVE_AMULET_IDS = Set.of(
+            ItemID.NZONE_SALVE_AMULET,
+            ItemID.NZONE_SALVE_AMULET_E,
+            ItemID.SW_SALVE_AMULET,
+            ItemID.SW_SALVE_AMULET_E,
+            ItemID.PVPA_SALVE_AMULET,
+            ItemID.PVPA_SALVE_AMULET_E
     );
+
+    // Bloat is conventionally meleed by the whole team, and the unimbued amulet/amulet(e) already give the
+    // full melee bonus, so also accept those here in addition to the imbued variants.
+    private static final Set<Integer> SALVE_AMULET_IDS = Stream.concat(
+            IMBUED_SALVE_AMULET_IDS.stream(),
+            Stream.of(net.runelite.api.ItemID.SALVE_AMULET, net.runelite.api.ItemID.SALVE_AMULET_E)
+    ).collect(Collectors.toUnmodifiableSet());
 
 
     @Override
@@ -128,7 +139,7 @@ public class SalveAmuletCheckerPlugin extends Plugin {
         navButton = NavigationButton.builder()
                 .tooltip("Salve Amulet Checker")
                 .icon(ICON)
-                .priority(10)
+                .priority(9)
                 .panel(panel)
                 .build();
         clientToolbar.addNavigation(navButton);
@@ -181,7 +192,7 @@ public class SalveAmuletCheckerPlugin extends Plugin {
         }
 
         tobManager.LoadRaiders();
-        if (!tobManager.GetRoom().equals(EntityNames.BLOAT.getEntityName()) || !config.isToxic()) {
+        if (!tobManager.isBloatActive() || !config.isToxic()) {
             return;
         }
 
@@ -197,6 +208,7 @@ public class SalveAmuletCheckerPlugin extends Plugin {
         if (!config.isEnabledInCox() || !coxManager.isPlayerInCoxRaid()) {
             return;
         }
+        coxManager.LoadRaiders();
         if (config.isSidePanelVisible()) {
             panel.setActiveMonster(EntityNames.MYSTIC.getEntityName(), true);
         }
@@ -205,7 +217,7 @@ public class SalveAmuletCheckerPlugin extends Plugin {
         }
         val playersMap = coxManager.getPlayersActiveInMysticRoom();
         playersMap.forEach((player) -> {
-            if (!isSalveAmuletEquipped(player)) {
+            if (!isImbuedSalveAmuletEquipped(player)) {
                 whenSalveAmuletNotEquipped(player);
             }
         });
@@ -220,20 +232,21 @@ public class SalveAmuletCheckerPlugin extends Plugin {
     }
 
     private void coxChatMessageAction(String chatMessage) {
-        Player player = client.getLocalPlayer();
-        if (player == null) {
-            return;
-        }
-        if (chatMessage.startsWith(CoxManager.RAID_START_MESSAGE)) {
-            coxManager.setUpRaidParty(player.getWorldLocation().getPlane(), player.getLocalLocation().getSceneX(), player.getLocalLocation().getSceneY());
-        } else if (chatMessage.startsWith(CoxManager.RAID_END_MESSAGE)) {
+        if (chatMessage.startsWith(CoxManager.RAID_END_MESSAGE)) {
             coxManager.clearRaiders();
         }
     }
 
     public boolean isSalveAmuletEquipped(Player player) {
-        int itemId = player.getPlayerComposition().getEquipmentId(KitType.AMULET);
-        return isSalveAmulet(itemId);
+        return isSalveAmulet(getEquippedAmuletId(player));
+    }
+
+    public boolean isImbuedSalveAmuletEquipped(Player player) {
+        return isImbuedSalveAmulet(getEquippedAmuletId(player));
+    }
+
+    private int getEquippedAmuletId(Player player) {
+        return player.getPlayerComposition().getEquipmentId(KitType.AMULET);
     }
 
     private void whenSalveAmuletNotEquipped(Player offendingPlayer) {
@@ -243,6 +256,10 @@ public class SalveAmuletCheckerPlugin extends Plugin {
 
     public boolean isSalveAmulet(int itemId) {
         return SALVE_AMULET_IDS.contains(itemId);
+    }
+
+    public boolean isImbuedSalveAmulet(int itemId) {
+        return IMBUED_SALVE_AMULET_IDS.contains(itemId);
     }
 
 }
