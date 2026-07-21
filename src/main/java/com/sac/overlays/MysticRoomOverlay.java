@@ -66,7 +66,7 @@ public class MysticRoomOverlay extends OverlayPanel {
         }
 
         playersInMysticRoom.forEach((player) -> {
-            val isSalveAmuletEquip = plugin.isSalveAmuletEquipped(player);
+            val isSalveAmuletEquip = plugin.isImbuedSalveAmuletEquipped(player);
             val salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
             panelComponent.getChildren().add(LineComponent.builder()
                     .left(player.getName())

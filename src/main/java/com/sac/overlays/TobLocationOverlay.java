@@ -7,6 +7,7 @@ import com.sac.enums.TobState;
 import lombok.val;
 import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.*;
+import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
@@ -38,6 +39,10 @@ public class TobLocationOverlay extends OverlayPanel {
         if (config.isLocationVisibleInTob() && plugin.tobManager.getTobState() == TobState.InTob) {
             val currentRoom = plugin.tobManager.GetRoom();
             if (currentRoom != null && !currentRoom.isEmpty()) {
+                panelComponent.setPreferredSize(new Dimension(
+                        Math.max(ComponentConstants.STANDARD_WIDTH, graphics.getFontMetrics().stringWidth(currentRoom) + 14),
+                        0
+                ));
                 panelComponent.getChildren().add(TitleComponent.builder()
                         .text(currentRoom)
                         .color(Color.white)
