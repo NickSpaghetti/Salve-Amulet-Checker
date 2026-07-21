@@ -79,8 +79,6 @@ public class SalveAmuletCheckerPlugin extends Plugin {
     private SalveAmuletCheckerPanel panel;
     private NavigationButton navButton;
 
-    // Only imbued variants give a bonus for ranged/magic (unimbued Salve amulet/amulet(e) are melee-only), so
-    // Mystics (mixed combat styles) requires an imbued amulet.
     private static final Set<Integer> IMBUED_SALVE_AMULET_IDS = Set.of(
             ItemID.NZONE_SALVE_AMULET,
             ItemID.NZONE_SALVE_AMULET_E,
@@ -90,8 +88,6 @@ public class SalveAmuletCheckerPlugin extends Plugin {
             ItemID.PVPA_SALVE_AMULET_E
     );
 
-    // Bloat is conventionally meleed by the whole team, and the unimbued amulet/amulet(e) already give the
-    // full melee bonus, so also accept those here in addition to the imbued variants.
     private static final Set<Integer> SALVE_AMULET_IDS = Stream.concat(
             IMBUED_SALVE_AMULET_IDS.stream(),
             Stream.of(net.runelite.api.ItemID.SALVE_AMULET, net.runelite.api.ItemID.SALVE_AMULET_E)
