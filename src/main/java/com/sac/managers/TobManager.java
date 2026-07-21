@@ -71,9 +71,6 @@ public class TobManager {
         return currentRoom;
     }
 
-    // Status messages that share this widget slot (death/wipe prompts, retry countdowns, etc.) are always full
-    // sentences with punctuation; room/boss names are always short with none, so filter on that shape rather
-    // than an ever-growing list of exact strings to exclude.
     private boolean looksLikeRoomName(String text) {
         String trimmed = text.trim();
         if (trimmed.isEmpty()) {
