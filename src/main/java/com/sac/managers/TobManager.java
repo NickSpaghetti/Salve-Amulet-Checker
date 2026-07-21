@@ -3,13 +3,15 @@ package com.sac.managers;
 import com.sac.enums.TobState;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.Varbits;
-import net.runelite.api.widgets.InterfaceID;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.NpcID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.util.HashSet;
+import java.util.Set;
 
 public class TobManager {
 
@@ -19,8 +21,16 @@ public class TobManager {
 
     public static int MAX_RAIDERS = 5;
     public static final int THEATRE_RAIDERS_VARC = 330;
-    public static final int TOB_BOSS_INTERFACE_ID = 1;
     public static final int TOB_BOSS_INTERFACE_TEXT_ID = 2;
+    private static final int MAX_ROOM_NAME_WORDS = 5;
+
+    private static final Set<Integer> BLOAT_NPC_IDS = Set.of(
+            NpcID.TOB_BLOAT,
+            NpcID.TOB_BLOAT_STORY,
+            NpcID.TOB_BLOAT_HARD,
+            NpcID.TOBQUEST_BLOAT,
+            NpcID.DEADMAN_BREACH_BLOAT
+    );
 
 
     @Inject
@@ -33,6 +43,11 @@ public class TobManager {
 
 
 
+    public boolean isBloatActive() {
+        return client.getLocalPlayer().getWorldView().npcs().stream()
+                .anyMatch(npc -> BLOAT_NPC_IDS.contains(npc.getId()));
+    }
+
     public void LoadRaiders(){
         for (int i = 0; i < MAX_RAIDERS; i++) {
             String playerName = client.getVarcStrValue(THEATRE_RAIDERS_VARC + i);
@@ -43,21 +58,41 @@ public class TobManager {
     }
 
     public String GetRoom(){
-        Widget widget = client.getWidget(InterfaceID.TOB, TOB_BOSS_INTERFACE_ID);
+        Widget widget = client.getWidget(InterfaceID.TobHud.ATMOSPHERIC);
         if (widget != null && widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID) != null) {
             Widget childWidget = widget.getChild(TOB_BOSS_INTERFACE_TEXT_ID);
             if(childWidget != null && !childWidget.getText().isEmpty()){
-                currentRoom = childWidget.getText();
+                String text = childWidget.getText();
+                if (looksLikeRoomName(text)) {
+                    currentRoom = text;
+                }
             }
         }
         return currentRoom;
+    }
+
+    // Status messages that share this widget slot (death/wipe prompts, retry countdowns, etc.) are always full
+    // sentences with punctuation; room/boss names are always short with none, so filter on that shape rather
+    // than an ever-growing list of exact strings to exclude.
+    private boolean looksLikeRoomName(String text) {
+        String trimmed = text.trim();
+        if (trimmed.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < trimmed.length(); i++) {
+            char c = trimmed.charAt(i);
+            if (c == '.' || c == ',' || c == '!' || c == '?') {
+                return false;
+            }
+        }
+        return trimmed.split("\\s+").length <= MAX_ROOM_NAME_WORDS;
     }
 
 
     public TobState getTobState() {
         if (client.getGameState() != GameState.LOGGED_IN) return TobState.NoParty;
 
-        TobState newRaidState =  TobState.fromInteger(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD));
+        TobState newRaidState =  TobState.fromInteger(client.getVarbitValue(VarbitID.TOB_CLIENT_PARTYSTATUS));
             if (newRaidState == TobState.NoParty || newRaidState == TobState.InParty) {
                 // We're not in a raid
                 resetTobState();
@@ -72,6 +107,7 @@ public class TobManager {
     private void resetTobState(){
         tobState = TobState.NoParty;
         tobRaiderNames = new HashSet<>();
+        currentRoom = null;
     }
 
 
