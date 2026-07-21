@@ -68,7 +68,7 @@ public class SalveAmuletCheckerPanel extends PluginPanel {
             add(monsterDropDownPanel);
         }
         catch (Exception ex){
-            ex.printStackTrace();
+            log.warn("Failed to load monster drop down.", ex);
         }
     }
 
