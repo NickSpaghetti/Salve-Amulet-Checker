@@ -14,7 +14,9 @@ import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
@@ -41,11 +43,15 @@ public class BloatRoomOverlay extends OverlayPanel {
     public Dimension render(Graphics2D graphics) {
 
         if(plugin.tobManager.getTobState() == TobState.InTob && plugin.tobManager.isBloatActive()){
+            List<Player> raiders = FindRaiders(plugin.tobManager.getRaiderNames());
+            if (config.hideWhenAllEquipped() && raiders.stream().allMatch(plugin::isSalveAmuletEquipped)) {
+                return super.render(graphics);
+            }
             panelComponent.getChildren().add(TitleComponent.builder()
                     .text("Salve Amulet Checker")
                     .color(Color.white)
                     .build());
-            DisplayNames(plugin.tobManager.getRaiderNames());
+            DisplayNames(raiders);
         }
 
 
@@ -53,23 +59,32 @@ public class BloatRoomOverlay extends OverlayPanel {
     }
 
 
-    private void DisplayNames(HashSet<String> playersNames){
+    private List<Player> FindRaiders(HashSet<String> playersNames){
+        List<Player> raiders = new ArrayList<>();
         if(playersNames == null){
-            return;
+            return raiders;
         }
 
         playersNames.forEach((playerName) -> {
             Player foundPlayer =  client.getLocalPlayer().getWorldView().players().stream().filter((player) -> player.getName().equals(playerName)).findFirst().orElseGet(() -> null);
             if(foundPlayer != null){
-                boolean isSalveAmuletEquip = plugin.isSalveAmuletEquipped(foundPlayer);
-                Color salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
-                panelComponent.getChildren().add(LineComponent.builder()
-                        .left(foundPlayer.getName())
-                        .right(isSalveAmuletEquip ? "Yes" : "No")
-                        .leftColor(Color.white)
-                        .rightColor(salveAmuletEquipColor)
-                        .build());
+                raiders.add(foundPlayer);
             }
+        });
+
+        return raiders;
+    }
+
+    private void DisplayNames(List<Player> raiders){
+        raiders.forEach((raider) -> {
+            boolean isSalveAmuletEquip = plugin.isSalveAmuletEquipped(raider);
+            Color salveAmuletEquipColor = isSalveAmuletEquip ? Color.green : Color.red;
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(raider.getName())
+                    .right(isSalveAmuletEquip ? "Yes" : "No")
+                    .leftColor(Color.white)
+                    .rightColor(salveAmuletEquipColor)
+                    .build());
         });
 
     }

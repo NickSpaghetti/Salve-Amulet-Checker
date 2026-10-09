@@ -69,4 +69,14 @@ public interface SalveAmuletCheckerConfig extends Config {
     default boolean isSidePanelVisible() {
         return true;
     }
+
+    @ConfigItem(
+            keyName = "hideWhenAllEquipped",
+            name = "Hide when all wearing a Salve",
+            description = "Hides the Salve Amulet Checker overlay when every raider in the room is wearing their Salve Amulet",
+            position = 4
+    )
+    default boolean hideWhenAllEquipped() {
+        return false;
+    }
 }
